@@ -1,0 +1,110 @@
+#Ejercicio donde hay que realizar un Script que genere un documento con todos
+# los datos de la geodatabase Corvallis.
+
+#Importamos los paquete arcpy y os:
+
+import arcpy
+import os
+
+#Creamos una variable con la ruta de la geodatabase
+#Solamente cambiando la ruta o el nombre de la geodatabase obtendremos todos los datos
+
+wksp = r'C:\Student\MasterGIS\Modulo3\Datos_Python\Ejercicio'
+arcpy.env.workspace = os.path.join(wksp, "Corvallis.gdb")
+
+#Creamos el archivo de texto
+txtFile = open(os.path.join(wksp,"CorvallisGDB.txt"), "w")
+txtFile.write("------------------------------" + "\n")
+txtFile.write("Informacion de la geodatabase" + "\n")
+txtFile.write("------------------------------" + "\n")
+
+
+#Describimos la geodatabase
+dGDB = arcpy.Describe(arcpy.env.workspace)
+txtFile.write(" GGDB Nombre: {} \n GDB Tipo: {} \n Release: {} \n Ruta: {} \n".format(dGDB.name,dGDB.workspaceType, dGDB.release, dGDB.path))
+txtFile.write(" WorkspaceID: {} \n ".format(dGDB.workspaceFactoryProgID))
+txtFile.write("\n"+"Lista de elementos dentro de la geodatabase:" + "\n")
+txtFile.write("-----------------------------" + "\n")
+for child in dGDB.children:
+    txtFile.write("Nombre: {}   ".format(child.name))
+    txtFile.write(" \t Tipo: {} \n".format(child.dataType))
+
+
+#Dataset
+
+txtFile.write("\n"+"Datasets dentro de la geodatabase" + "\n")
+txtFile.write("-------------------------------------" + "\n")
+
+Datalist = arcpy.ListDatasets()
+
+if (Datalist == []):
+    txtFile.write("No hay Datasets \n")
+else:
+    for dts in Datalist:
+        txtFile.write("Nombre:{}\n".format(dts))
+        Dataset = arcpy.Describe(dts)
+        txtFile.write("Tipo: {} \nPuede versionarse: {} \nVersionado:{} \nID: {} \nMExtent:{} \nZExtent: {}\n"
+                        .format(Dataset.datasetType,Dataset.canVersion,Dataset.isVersioned,Dataset.DSID,Dataset.MExtent,Dataset.ZExtent))
+        spatial_ref = arcpy.Describe(dts).spatialReference
+
+        txtFile.write("Sistema de coordenadas: {} \n".format(spatial_ref.name))
+        txtFile.write("\n"+"\t CAMPOS E INFORMACION:" + "\n")
+
+    fields = arcpy.ListFields(dts)
+    for field in fields:
+         txtFile.write("\tNombre: {0}   \t Tipo: {1}      \tEditable: {2}   \tDato Obligatorio: {3}   \tEscala: {4}   \tPrecision: {5}   \tSize: {6}   \n"
+                        .format(field.name, field.type,field.editable,field.required,field.scale,field.precision, field.length))
+
+
+
+
+
+#Clases de entidad
+
+
+txtFile.write("\n"+"Clases de entidad dentro de la geodatabase" + "\n")
+txtFile.write("-------------------------------------" + "\n")
+
+Fclist = arcpy.ListFeatureClasses()
+
+if (Fclist == []):
+    txtFile.write("No hay Clases de Entidad \n")
+else:
+    for fc in Fclist:
+        txtFile.write("\nNombre:  "+fc +"\n")
+        FeautureCl = arcpy.Describe(fc)
+        txtFile.write("Tipo: {} \nGeometria M valuable: {} \nGeometria Z valuable:{} \nIndice Espacial: {} \nNombre shp:{} \nTipo shp: {}\n"
+                        .format(FeautureCl.featureType,FeautureCl.hasM,FeautureCl.hasZ,FeautureCl.hasSpatialIndex,FeautureCl.shapeFieldName,FeautureCl.shapeType))
+        txtFile.write("\n"+"\t CAMPOS E INFORMACION:" + "\n")
+        fields = arcpy.ListFields(fc)
+        for field in fields:
+             txtFile.write("\tNombre: {0}   \t Tipo: {1}      \tEditable: {2}   \tDato Obligatorio: {3}   \tEscala: {4}   \tPrecision: {5}   \tSize: {6}   \n"
+                            .format(field.name, field.type,field.editable,field.required,field.scale,field.precision, field.length))
+
+
+#Raster
+
+txtFile.write("\n"+"Raster dentro de la geodatabase" + "\n")
+txtFile.write("-------------------------------------" + "\n")
+
+Raslist = arcpy.ListRasters()
+
+if (Raslist == []):
+    txtFile.write("No hay Raster \n")
+else:
+    for Rs in Raslist:
+        txtFile.write(Rs + "\n")
+        txtFile.write("\n"+"\t CAMPOS E INFORMACION:" + "\n")
+        fields = arcpy.ListFields(fc)
+        for field in fields:
+             txtFile.write("\tNombre: {0}   \t Tipo: {1}      \tEditable: {2}   \tDato Obligatorio: {3}   \tEscala: {4}   \tPrecision: {5}   \tSize: {6}   \n"
+                            .format(field.name, field.type,field.editable,field.required,field.scale,field.precision, field.length))
+
+
+
+
+
+txtFile.close()
+print ("Script completado")
+
+#os.popen(os.path.join(wksp,"CorvallisGDB.txt"))
